@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Absensi Siswa MANSDA</title>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    body{
+      background:#f1f5f9;
+    }
+
+    .container{
+      width:90%;
+      max-width:1200px;
+      margin:auto;
+      padding:20px;
+    }
+
+    /* LOGIN & REGISTER */
+    .auth-box{
+      width:350px;
+      background:white;
+      margin:80px auto;
+      padding:30px;
+      border-radius:10px;
+      box-shadow:0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .auth-box h2{
+      text-align:center;
+      margin-bottom:20px;
+      color:#2563eb;
+    }
+
+    .auth-box input{
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      border:1px solid #ccc;
+      border-radius:5px;
+    }
+
+    .auth-box button{
+      width:100%;
+      padding:12px;
+      margin-top:15px;
+      border:none;
+      background:#2563eb;
+      color:white;
+      font-weight:bold;
+      border-radius:5px;
+      cursor:pointer;
+    }
+
+    .switch{
+      margin-top:15px;
+      text-align:center;
+      cursor:pointer;
+      color:#2563eb;
+    }
+
+    /* DASHBOARD */
+    .dashboard{
+      display:none;
+    }
+
+    .header{
+      background:#2563eb;
+      color:white;
+      padding:20px;
+      border-radius:10px;
+      margin-bottom:20px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .logout{
+      background:red;
+      color:white;
+      border:none;
+      padding:10px 15px;
+      border-radius:5px;
+      cursor:pointer;
+    }
+
+    .card{
+      background:white;
+      padding:20px;
+      border-radius:10px;
+      margin-bottom:20px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .card input{
+      width:100%;
+      padding:10px;
+      margin-top:10px;
+      margin-bottom:15px;
+      border:1px solid #ccc;
+      border-radius:5px;
+    }
+
+    .btn{
+      padding:10px 15px;
+      border:none;
+      border-radius:5px;
+      color:white;
+      cursor:pointer;
+      font-weight:bold;
+    }
+
+    .tambah{ background:green; }
+    .hadir{ background:#22c55e; }
+    .izin{ background:#f59e0b; }
+    .sakit{ background:#3b82f6; }
+    .alpa{ background:#ef4444; }
+    .hapus{ background:#991b1b; }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:15px;
+    }
+
+    table th, table td{
+      border:1px solid #ddd;
+      padding:10px;
+      text-align:center;
+    }
+
+    table th{
+      background:#2563eb;
+      color:white;
+    }
+
+    @media(max-width:768px){
+
+      .auth-box{
+        width:95%;
+      }
+
+      table{
+        font-size:12px;
+      }
+
+      .header{
+        flex-direction:column;
+        gap:10px;
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div class="auth-box" id="loginBox">
+
+  <h2>Login Admin</h2>
+
+  <input type="text" id="loginUsername" placeholder="Username">
+
+  <input type="password" id="loginPassword" placeholder="Password">
+
+  <button onclick="login()">Login</button>
+
+  <div class="switch" onclick="showRegister()">
+    Belum punya akun? Register
+  </div>
+
+</div>
+
+<!-- REGISTER -->
+<div class="auth-box" id="registerBox" style="display:none;">
+
+  <h2>Register Admin</h2>
+
+  <input type="text" id="registerUsername" placeholder="Username">
+
+  <input type="password" id="registerPassword" placeholder="Password">
+
+  <button onclick="register()">Register</button>
+
+  <div class="switch" onclick="showLogin()">
+    Sudah punya akun? Login
+  </div>
+
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard">
+
+  <div class="container">
+
+    <div class="header">
+
+      <div>
+        <h1>Absensi Siswa MAN</h1>
+        <p id="tanggal"></p>
+      </div>
+
+      <button class="logout" onclick="logout()">
+        Logout
+      </button>
+
+    </div>
+
+    <!-- TAMBAH SISWA -->
+    <div class="card">
+
+      <h2>Tambah Siswa</h2>
+
+      <input type="text" id="nama" placeholder="Nama Siswa">
+
+      <input type="text" id="kelas" placeholder="Kelas">
+
+      <button class="btn tambah" onclick="tambahSiswa()">
+        Tambah Siswa
+      </button>
+
+    </div>
+
+    <!-- TABEL -->
+    <div class="card">
+
+      <h2>Data Absensi</h2>
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama</th>
+            <th>Kelas</th>
+            <th>Status</th>
+            <th>Jam</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+
+        <tbody id="tbody"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+  // TAMPIL FORM
+  function showRegister(){
+
+    document.getElementById("loginBox").style.display = "none";
+
+    document.getElementById("registerBox").style.display = "block";
+
+  }
+
+  function showLogin(){
+
+    document.getElementById("registerBox").style.display = "none";
+
+    document.getElementById("loginBox").style.display = "block";
+
+  }
+
+  // REGISTER
+  function register(){
+
+    let username =
+      document.getElementById("registerUsername").value;
+
+    let password =
+      document.getElementById("registerPassword").value;
+
+    if(username === "" || password === ""){
+
+      alert("Data harus diisi!");
+
+      return;
+
+    }
+
+    let users =
+      JSON.parse(localStorage.getItem("users")) || [];
+
+    let cekUser =
+      users.find(user => user.username === username);
+
+    if(cekUser){
+
+      alert("Username sudah digunakan!");
+
+      return;
+
+    }
+
+    users.push({
+      username:username,
+      password:password
+    });
+
+    localStorage.setItem("users",JSON.stringify(users));
+
+    alert("Register berhasil!");
+
+    showLogin();
+
+  }
+
+  // LOGIN
+  function login(){
+
+    let username =
+      document.getElementById("loginUsername").value;
+
+    let password =
+      document.getElementById("loginPassword").value;
+
+    let users =
+      JSON.parse(localStorage.getItem("users")) || [];
+
+    let validUser =
+      users.find(user =>
+        user.username === username &&
+        user.password === password
+      );
+
+    if(validUser){
+
+      localStorage.setItem("login","true");
+
+      localStorage.setItem("admin",username);
+
+      tampilDashboard();
+
+    }else{
+
+      alert("Username atau password salah!");
+
+    }
+
+  }
+
+  // DASHBOARD
+  function tampilDashboard(){
+
+    document.getElementById("loginBox").style.display = "none";
+
+    document.getElementById("registerBox").style.display = "none";
+
+    document.getElementById("dashboard").style.display = "block";
+
+  }
+
+  // LOGOUT
+  function logout(){
+
+    localStorage.removeItem("login");
+
+    localStorage.removeItem("admin");
+
+    location.reload();
+
+  }
+
+  // CEK LOGIN
+  if(localStorage.getItem("login") === "true"){
+
+    tampilDashboard();
+
+  }
+
+  // TANGGAL
+  const tanggal = new Date();
+
+  document.getElementById("tanggal").innerHTML =
+    tanggal.toLocaleDateString('id-ID',{
+      weekday:'long',
+      year:'numeric',
+      month:'long',
+      day:'numeric'
+    });
+
+  // DATA SISWA
+  let siswa =
+    JSON.parse(localStorage.getItem("dataSiswa")) || [];
+
+  // TAMPILKAN DATA
+  function tampilkanData(){
+
+    let tbody = document.getElementById("tbody");
+
+    tbody.innerHTML = "";
+
+    siswa.forEach((item,index)=>{
+
+      tbody.innerHTML += `
+        <tr>
+
+          <td>${index+1}</td>
+
+          <td>${item.nama}</td>
+
+          <td>${item.kelas}</td>
+
+          <td>${item.status}</td>
+
+          <td>${item.jam}</td>
+
+          <td>
+
+            <button class="btn hadir"
+            onclick="ubahStatus(${index},'Hadir')">
+            Hadir
+            </button>
+
+            <button class="btn izin"
+            onclick="ubahStatus(${index},'Izin')">
+            Izin
+            </button>
+
+            <button class="btn sakit"
+            onclick="ubahStatus(${index},'Sakit')">
+            Sakit
+            </button>
+
+            <button class="btn alpa"
+            onclick="ubahStatus(${index},'Alpa')">
+            Alpa
+            </button>
+
+            <br><br>
+
+            <button class="btn hapus"
+            onclick="hapusSiswa(${index})">
+            Hapus
+            </button>
+
+          </td>
+
+        </tr>
+      `;
+
+    });
+
+  }
+
+  // TAMBAH SISWA
+  function tambahSiswa(){
+
+    let nama =
+      document.getElementById("nama").value;
+
+    let kelas =
+      document.getElementById("kelas").value;
+
+    if(nama === "" || kelas === ""){
+
+      alert("Data harus diisi!");
+
+      return;
+
+    }
+
+    siswa.push({
+      nama:nama,
+      kelas:kelas,
+      status:"Belum Absen",
+      jam:"-"
+    });
+
+    localStorage.setItem(
+      "dataSiswa",
+      JSON.stringify(siswa)
+    );
+
+    tampilkanData();
+
+    document.getElementById("nama").value = "";
+
+    document.getElementById("kelas").value = "";
+
+  }
+
+  // UBAH STATUS
+  function ubahStatus(index,status){
+
+    let waktu = new Date();
+
+    let jam =
+      waktu.getHours().toString().padStart(2,'0')
+      + ":" +
+      waktu.getMinutes().toString().padStart(2,'0')
+      + ":" +
+      waktu.getSeconds().toString().padStart(2,'0');
+
+    siswa[index].status = status;
+
+    siswa[index].jam = jam;
+
+    localStorage.setItem(
+      "dataSiswa",
+      JSON.stringify(siswa)
+    );
+
+    tampilkanData();
+
+  }
+
+  // HAPUS
+  function hapusSiswa(index){
+
+    if(confirm("Yakin ingin menghapus data?")){
+
+      siswa.splice(index,1);
+
+      localStorage.setItem(
+        "dataSiswa",
+        JSON.stringify(siswa)
+      );
+
+      tampilkanData();
+
+    }
+
+  }
+
+  tampilkanData();
+
+</script>
+
+</body>
+</html>
